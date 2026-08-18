@@ -182,6 +182,34 @@ const MOBILE_BREAKPOINT = 768;
 const DESKTOP_CAPTURE_WIDTH = 1100;
 const LR_SAVE_CAPTURE_WIDTH = 1280;
 
+/*
+ * 저장(캡처)에 쓸 배율을 안전하게 계산한다.
+ *
+ * iOS 사파리는 캔버스 한 장이 가질 수 있는 총 픽셀 수에 한계가 있다
+ * (기기/버전마다 다르지만 대략 4096 x 4096 ≒ 1,677만 픽셀 수준).
+ * 이 한계를 넘으면 에러가 나지 않고 "초과한 부분(대개 아래쪽)이
+ * 그냥 잘린 채로" 캔버스가 만들어진다.
+ *
+ * 이전에는 scale을 4로 고정해 뒀는데, 마크(8인)를 포함한 칠페스
+ * 취향표처럼 표가 세로로 길어지는 경우 (가로 1100px × 세로 ~1000px)
+ * x scale 4 = 4400 x 4000 ≒ 1,760만 픽셀로 한도를 넘어서고, 범례와
+ * 아이디가 있는 맨 아래쪽이 잘려서 저장되는 원인이 됐다.
+ * (인원이 적어 표가 짧은 엔위시 취향표는 우연히 한도 안에 들어와서
+ *  같은 코드로도 문제없이 저장됐던 것)
+ *
+ * 그래서 실제로 캡처될 가로/세로 크기를 기준으로, 한도를 넘지 않는
+ * 선에서 최대한 고화질(최대 4배, 최소 2배)로 자동 조절한다.
+ */
+const MAX_CANVAS_PIXELS = 15000000; // iOS 한계(약 1,677만)보다 여유를 둔 안전값
+const MAX_CAPTURE_SCALE = 4;
+const MIN_CAPTURE_SCALE = 2;
+
+function getSafeCaptureScale(width, height) {
+    const rawScale = Math.sqrt(MAX_CANVAS_PIXELS / (width * height));
+    const scale = Math.min(MAX_CAPTURE_SCALE, rawScale);
+    return Math.max(MIN_CAPTURE_SCALE, Math.floor(scale * 100) / 100);
+}
+
 let currentTarget = null; // { type: "cell", td } | { type: "row", index } | { type: "col", index }
 let currentTab = "rps";
 let currentPhotoIndex = null;
@@ -829,15 +857,19 @@ saveBtn.addEventListener("click", async () => {
 
     try {
         const captureWidth = currentTab === "lr" ? LR_SAVE_CAPTURE_WIDTH : DESKTOP_CAPTURE_WIDTH;
+        const finalWidth = Math.max(captureWidth, area.scrollWidth);
+        const finalHeight = area.scrollHeight;
+        const captureScale = getSafeCaptureScale(finalWidth, finalHeight);
+
         const canvas = await html2canvas(area, {
             backgroundColor: "#ffffff",
-            scale: 4,
+            scale: captureScale,
             useCORS: true,
             logging: false,
-            width: Math.max(captureWidth, area.scrollWidth),
-            height: area.scrollHeight,
-            windowWidth: Math.max(captureWidth, area.scrollWidth),
-            windowHeight: area.scrollHeight,
+            width: finalWidth,
+            height: finalHeight,
+            windowWidth: finalWidth,
+            windowHeight: finalHeight,
             /*
              * html2canvas는 textarea 안의 줄바꿈/자동 줄바꿈을 제대로
              * 그리지 못해서(한 줄로만 렌더링되며 잘려 보임), 캡처용으로
@@ -859,7 +891,7 @@ saveBtn.addEventListener("click", async () => {
 
         /*
          * data: URL 대신 Blob URL을 사용한다.
-         * 표가 커지고 고화질(scale 4)로 캡처하면서 이미지 용량이 커졌는데,
+         * 표가 커지고 고화질로 캡처하면서 이미지 용량이 커졌는데,
          * 아이폰 사파리는 큰 data: URL을 <a download>로 다운로드할 때
          * "다운로드하시겠습니까?" 확인창까지만 뜨고 실제 저장은 안 되는
          * 경우가 있다. Blob URL은 이런 용량 제한 없이 정상적인
