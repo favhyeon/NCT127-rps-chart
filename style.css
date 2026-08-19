@@ -1,19 +1,4 @@
 /* ===========================
-   컬러 팔레트 (og 이미지 배경색 #00C753 기준 추출)
-=========================== */
-
-:root {
-    --brand-main: #00C753;        /* 메인 그린 (og 배경색) */
-    --brand-dark: #00A84A;        /* 메인보다 어두운 톤 (hover/버튼) */
-    --brand-darker: #018A3C;      /* 타이틀/포인트 텍스트, 체크박스 accent */
-    --brand-mid: #2E9A5C;         /* 비활성 탭 텍스트 */
-    --brand-light: #E3F9EA;       /* 옅은 배경 */
-    --brand-light-hover: #D2F3DC; /* 옅은 배경 hover */
-    --brand-border: #BEEBCB;      /* 옅은 테두리 */
-    --brand-muted: #8FCBA6;       /* placeholder/보조 텍스트 */
-}
-
-/* ===========================
    기본 설정
 =========================== */
 
@@ -65,7 +50,7 @@ body {
 .tab-wrap {
     display: flex;
     gap: 8px;
-    background: var(--brand-light);
+    background: #e3f2e9;
     padding: 6px;
     border-radius: 999px;
     margin-bottom: 18px;
@@ -78,17 +63,17 @@ body {
     border-radius: 999px;
     font-size: 15px;
     font-weight: 800;
-    color: var(--brand-mid);
+    color: #0ab852;
     cursor: pointer;
     transition: .2s;
 }
 
 .tab-btn:hover {
-    color: var(--brand-darker);
+    color: #0b8e42;
 }
 
 .tab-btn.active {
-    background: var(--brand-main);
+    background: #8de2b1;
     color: #1a1a1a;
 }
 
@@ -100,7 +85,7 @@ body {
     display: block;
     width: 300px;
     height: auto;
-    margin: 0 auto 4px;
+    margin: 0 auto 44px;
 }
 
 h1 {
@@ -108,8 +93,8 @@ h1 {
     font-size: 34px;
     line-height: 1.15;
     font-weight: 900;
-    color: var(--brand-darker);
-    margin: 0 0 38px;
+    color: #0b8e42;
+    margin: 0 0 22px;
 }
 
 .capture-id-bottom {
@@ -126,7 +111,7 @@ h1 {
     margin-left: 10px;
     font-size: 16px;
     font-weight: 700;
-    color: var(--brand-dark);
+    color: #0ab852;
     vertical-align: middle;
 }
 
@@ -152,8 +137,8 @@ h1 {
     height: 32px;
     border-radius: 50%;
     border: none;
-    background: var(--brand-light);
-    color: var(--brand-darker);
+    background: #e3f2e9;
+    color: #0b8e42;
     font-size: 13px;
     display: flex;
     align-items: center;
@@ -163,7 +148,7 @@ h1 {
 }
 
 .nav-btn:hover:not(:disabled) {
-    background: var(--brand-light-hover);
+    background: #ddeacd;
     transform: none;
 }
 
@@ -183,7 +168,7 @@ table {
 }
 
 th {
-    background: var(--brand-main);
+    background: #8de2b1;
     color: #1a1a1a;
     height: 68px;
     font-size: 23px;
@@ -201,7 +186,7 @@ th:first-child {
 }
 
 .clickable-header:hover {
-    background: var(--brand-dark);
+    background: #55e792;
 }
 
 td {
@@ -256,7 +241,7 @@ td:hover {
 }
 
 /* ===========================
-   공수 취향표
+   왼른 취향표
 =========================== */
 
 .lr-grid {
@@ -281,8 +266,8 @@ td:hover {
     overflow: hidden;
     flex: 0 0 auto;
     cursor: pointer;
-    border: 4px solid var(--brand-light);
-    background: var(--brand-light);
+    border: 4px solid #e3f2e9;
+    background: #e3f2e9;
 }
 
 .lr-avatar img {
@@ -326,7 +311,7 @@ td:hover {
 .lr-label-r {
     font-size: 17px;
     font-weight: 800;
-    color: var(--brand-darker);
+    color: #0b8e42;
     flex: 0 0 auto;
 }
 
@@ -334,7 +319,7 @@ td:hover {
     flex: 1;
     display: flex;
     height: 32px;
-    border: 2px solid var(--brand-border);
+    border: 2px solid #cedfb9;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -343,7 +328,7 @@ td:hover {
     flex: 1;
     height: 100%;
     background: #fff;
-    border-right: 1px solid var(--brand-light);
+    border-right: 1px solid #e6eedd;
     cursor: pointer;
     transition: .1s;
 }
@@ -353,11 +338,11 @@ td:hover {
 }
 
 .lr-cell:hover {
-    background: var(--brand-light-hover);
+    background: #f0f8e8;
 }
 
 .lr-cell.filled {
-    background: var(--brand-main);
+    background: #8de2b1;
 }
 
 .lr-text-wrap {
@@ -369,7 +354,7 @@ td:hover {
     min-height: 150px;
     resize: none;
     overflow: hidden;
-    border: 2px solid var(--brand-border);
+    border: 2px solid #cedfb9;
     border-radius: 10px;
     padding: 12px 14px 26px;
     font-size: 17px;
@@ -381,11 +366,11 @@ td:hover {
 }
 
 .lr-text:focus {
-    border-color: var(--brand-darker);
+    border-color: #0b8e42;
 }
 
 .lr-text::placeholder {
-    color: var(--brand-muted);
+    color: #9cb181;
 }
 
 .lr-char-count {
@@ -393,7 +378,7 @@ td:hover {
     right: 12px;
     bottom: 8px;
     font-size: 12px;
-    color: var(--brand-muted);
+    color: #9cb181;
     font-weight: 600;
     pointer-events: none;
 }
@@ -436,12 +421,12 @@ button:hover {
 }
 
 #saveBtn {
-    background: var(--brand-main);
+    background: #8de2b1;
     color: #1a1a1a;
 }
 
 #saveBtn:hover {
-    background: var(--brand-dark);
+    background: #55e792;
 }
 
 #resetBtn {
@@ -482,7 +467,7 @@ button:hover {
 .date-toggle input {
     width: 17px;
     height: 17px;
-    accent-color: var(--brand-darker);
+    accent-color: #0b8e42;
     cursor: pointer;
 }
 
@@ -652,7 +637,7 @@ button:hover {
 }
 
 .reset-colors-link:hover {
-    color: var(--brand-darker);
+    color: #0b8e42;
 }
 
 .modal-extra {
@@ -678,7 +663,7 @@ button:hover {
 .hide-toggle input {
     width: 16px;
     height: 16px;
-    accent-color: var(--brand-darker);
+    accent-color: #0b8e42;
     cursor: pointer;
 }
 
@@ -760,12 +745,12 @@ button:hover {
 
     .logo {
         width: 130px;
-        margin: 0 auto 2px;
+        margin: 0 auto 20px;
     }
 
     h1 {
         font-size: 19px;
-        margin: 0 0 14px;
+        margin: 0 0 10px;
     }
 
     .chart-date {
@@ -782,7 +767,7 @@ button:hover {
         line-height: 1.5;
     }
 
-    /* 칠페스 취향표 - 화면 폭에 맞춰 표 전체가 줄어들어
+    /* 윗페스 취향표 - 화면 폭에 맞춰 표 전체가 줄어들어
        드래그 없이 한 화면에 다 보이도록 한다. */
     .table-wrap {
         overflow-x: visible;
@@ -795,8 +780,8 @@ button:hover {
     }
 
     th {
-        height: 34px;
-        font-size: 10px;
+        height: 38px;
+        font-size: 11px;
         padding: 0 1px;
         word-break: keep-all;
     }
@@ -806,8 +791,8 @@ button:hover {
     }
 
     td {
-        height: 34px;
-        font-size: 10px;
+        height: 38px;
+        font-size: 11px;
         padding: 0 1px;
     }
 

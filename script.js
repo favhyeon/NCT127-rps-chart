@@ -1,5 +1,5 @@
 /* ==========================================
-   IDID 취향표 (NCT 127 ver.)
+   칠페스 취향표 (NCT 127)
 ========================================== */
 
 /* 표(행/열 헤더)에 표시할 멤버 이름 */
@@ -17,6 +17,9 @@ const members = [
 /* 멤버별 본인 이니셜 (닉네임, 행/열 숨기기 문구에 사용) */
 const ownInitials = ["쟌", "툥", "윹", "도", "재", "정", "맠", "동"];
 
+/* 마크는 탈퇴 멤버라, 체크박스로 8인/7인 구성을 전환할 수 있다. */
+const MARK_INDEX = 6;
+
 /* 멤버별 기본 아바타 색상 (사진 로드 실패 시 대체용) */
 const memberColors = [
     "#63d1e2",
@@ -26,34 +29,38 @@ const memberColors = [
     "#c9a4ff",
     "#ff9ec8",
     "#ffb37a",
-    "#7bdcb5"
+    "#ff8f8f"
 ];
 
 /* 멤버별 기본 프로필 사진 (members 배열과 순서 동일) */
 const defaultPhotos = [
-    "assets/m1.png",
-    "assets/m2.png",
-    "assets/m3.png",
-    "assets/m4.png",
-    "assets/m5.png",
-    "assets/m6.png",
-    "assets/m7.png",
-    "assets/m8.png"
+    "assets/johnny.png",
+    "assets/taeyong.png",
+    "assets/yuta.png",
+    "assets/doyoung.png",
+    "assets/jaehyun.png",
+    "assets/jungwoo.png",
+    "assets/mark.png",
+    "assets/haechan.png"
 ];
-
-/* 마크는 탈퇴 멤버라 체크박스로 8인/7인 구성을 전환할 수 있다. */
-const MARK_INDEX = members.indexOf("마크");
 
 /*
  * 표에 표시할 커플명.
  * [행 멤버][열 멤버] 순서.
  * 대각선(본인조합)은 각 멤버 본인의 이니셜을 두 번 합쳐서 만들었어요.
- * 이니셜(쟌·툥·윹·도·재·정·맠·동)을 그대로 이어붙인 기본값이라,
- * 원하는 조합명으로 자유롭게 pairNames 값만 바꿔서 쓰시면 돼요.
+ * 이니셜(쟌·툥·윹·도·재·정·맠·동)을 그대로 이어붙인 기본값이니,
+ * 원하는 조합명으로 자유롭게 바꿔서 쓰시면 돼요.
  */
-const pairNames = ownInitials.map(rowInitial =>
-    ownInitials.map(colInitial => rowInitial + colInitial)
-);
+const pairNames = [
+    ["쟌쟌", "쟌툥", "쟌윹", "쟌도", "쟌재", "쟌정", "쟌맠", "쟌동"],
+    ["툥쟌", "툥툥", "툥윹", "툥도", "툥재", "툥정", "툥맠", "툥동"],
+    ["윹쟌", "윹툥", "윹윹", "윹도", "윹재", "윹정", "윹맠", "윹동"],
+    ["도쟌", "도툥", "도윹", "도도", "도재", "도정", "도맠", "도동"],
+    ["재쟌", "재툥", "재윹", "재도", "재재", "재정", "재맠", "재동"],
+    ["정쟌", "정툥", "정윹", "정도", "정재", "정정", "정맠", "정동"],
+    ["맠쟌", "맠툥", "맠윹", "맠도", "맠재", "맠정", "맠맠", "맠동"],
+    ["동쟌", "동툥", "동윹", "동도", "동재", "동정", "동맠", "동동"]
+];
 
 const options = [
     { name: "OTP",      color: "#f7cde0" },
@@ -68,7 +75,7 @@ const options = [
 /* 사용자가 직접 고른 커스텀 색상 (name -> hex).
    여기에 값이 있으면 기본 color 대신 이 색을 쓴다.
    options 배열의 기본값 자체는 절대 덮어쓰지 않는다. */
-const CUSTOM_COLOR_KEY = "idid-custom-colors";
+const CUSTOM_COLOR_KEY = "nct127-custom-colors";
 let customColors = JSON.parse(localStorage.getItem(CUSTOM_COLOR_KEY)) || {};
 
 function getOptionColor(option) {
@@ -85,15 +92,27 @@ function resetCustomColors() {
     localStorage.removeItem(CUSTOM_COLOR_KEY);
 }
 
-const STORAGE_KEY = "idid-chilpes-rps";
-const LR_STORAGE_KEY = "idid-lr-rps";
+const STORAGE_KEY = "nct127-chilpes-rps";
+const LR_STORAGE_KEY = "nct127-lr-rps";
 const LR_CELL_COUNT = 12;
 
 /* 행/열 개별 숨기기 상태 (멤버 인덱스 기준, rows/cols 따로 관리) */
-const HIDDEN_KEY = "idid-hidden-members";
+const HIDDEN_KEY = "nct127-hidden-members";
 const hiddenSaved = JSON.parse(localStorage.getItem(HIDDEN_KEY)) || { rows: [], cols: [] };
 let hiddenRows = new Set(hiddenSaved.rows);
 let hiddenCols = new Set(hiddenSaved.cols);
+
+/* 마크 포함(7인) / 제외(6인) 여부 - 체크박스로 전환.
+   기본값은 켜짐(7인 구성)이라, 꺼본 적 없는 사용자는 "0"이 저장돼 있지 않다. */
+const MARK_INCLUDED_KEY = "nct127-include-mark";
+let includeMark = localStorage.getItem(MARK_INCLUDED_KEY) !== "0";
+
+/* 마크 토글을 반영해 실제로 화면/이미지에 표시할지 여부를 판단한다.
+   기존의 행/열 개별 숨기기(hiddenRows/hiddenCols)와는 별개로 동작하며,
+   두 조건 모두를 만족해야 화면에 노출된다. */
+function isMemberActive(index) {
+    return includeMark || index !== MARK_INDEX;
+}
 
 function saveHiddenState() {
     localStorage.setItem(HIDDEN_KEY, JSON.stringify({
@@ -102,32 +121,9 @@ function saveHiddenState() {
     }));
 }
 
-/* 마크 포함(8인) / 제외(7인) 여부 - 체크박스로 켜고 끔
-   기본값은 켜짐(8인 전체 구성)이라, 꺼본 적 없는 사용자는 "0"이 저장돼 있지 않다. */
-const INCLUDE_MARK_KEY = "idid-include-mark";
-let includeMark = localStorage.getItem(INCLUDE_MARK_KEY) !== "0";
-
-/* includeMark 상태를 실제 행/열 숨기기 상태(hiddenRows/hiddenCols)에 반영한다.
-   마크를 개별적으로 숨기는 것과 같은 방식으로 처리해서,
-   표/공수 그리드 양쪽 모두 자연스럽게 8인↔7인 전환이 되도록 한다. */
-function applyMarkVisibility() {
-    if (MARK_INDEX === -1) return;
-
-    if (includeMark) {
-        hiddenRows.delete(MARK_INDEX);
-        hiddenCols.delete(MARK_INDEX);
-    } else {
-        hiddenRows.add(MARK_INDEX);
-        hiddenCols.add(MARK_INDEX);
-    }
-    saveHiddenState();
-}
-
-applyMarkVisibility();
-
 /* 자공자수(본인조합, 대각선 칸) 표시 여부 - 체크박스로 켜고 끔
    기본값은 켜짐(기존 동작과 동일)이라, 꺼본 적 없는 사용자는 "0"이 저장돼 있지 않다. */
-const SELF_PAIR_KEY = "idid-include-selfpair";
+const SELF_PAIR_KEY = "nct127-include-selfpair";
 let includeSelfPair = localStorage.getItem(SELF_PAIR_KEY) !== "0";
 
 /* 대각선(본인×본인) 칸을 표시할지 여부에 따라 실제로 화면/이미지에 그릴 텍스트를 반환한다.
@@ -268,7 +264,7 @@ if (selfPairToggle) {
 }
 
 /* ==========================================
-   마크 포함(8인) / 제외(7인) 토글
+   마크 포함(7인) / 제외(6인) 토글
 ========================================== */
 
 if (markToggle) {
@@ -276,11 +272,9 @@ if (markToggle) {
 
     markToggle.addEventListener("change", () => {
         includeMark = markToggle.checked;
-        localStorage.setItem(INCLUDE_MARK_KEY, includeMark ? "1" : "0");
-        applyMarkVisibility();
+        localStorage.setItem(MARK_INCLUDED_KEY, includeMark ? "1" : "0");
         createTable();
         createLrGrid();
-        fitCaptureArea();
     });
 }
 
@@ -324,8 +318,8 @@ tabLr.addEventListener("click", () => switchTab("lr"));
 function createTable() {
     table.innerHTML = "";
 
-    const visibleColIndexes = members.map((_, i) => i).filter(i => !hiddenCols.has(i));
-    const visibleRowIndexes = members.map((_, i) => i).filter(i => !hiddenRows.has(i));
+    const visibleColIndexes = members.map((_, i) => i).filter(i => isMemberActive(i) && !hiddenCols.has(i));
+    const visibleRowIndexes = members.map((_, i) => i).filter(i => isMemberActive(i) && !hiddenRows.has(i));
 
     const head = document.createElement("tr");
     const empty = document.createElement("th");
@@ -618,8 +612,7 @@ function createLrGrid() {
     lrGrid.innerHTML = "";
 
     members.forEach((member, index) => {
-        /* 마크가 제외(7인) 상태면 공수 표에서도 함께 숨긴다. */
-        if (!includeMark && index === MARK_INDEX) return;
+        if (!isMemberActive(index)) return;
 
         const row = document.createElement("div");
         row.className = "lr-row";
@@ -785,9 +778,6 @@ resetBtn.addEventListener("click", () => {
         saveData = {};
         hiddenRows = new Set();
         hiddenCols = new Set();
-        /* 마크 포함/제외 설정은 초기화 대상이 아니므로, 숨기기 상태를
-           비운 직후 다시 반영해서 8인/7인 구성이 유지되도록 한다. */
-        applyMarkVisibility();
         historyStack = [];
         redoStack = [];
         updateNavButtons();
@@ -816,40 +806,18 @@ saveBtn.addEventListener("click", async () => {
     area.classList.add("capturing");
 
     /* 화면(특히 모바일)에 적용돼 있던 축소/반응형 스타일을 잠시 걷어내고,
-       항상 PC 버전과 동일한 1100px 레이아웃으로 저장되도록 한다.
-       html2canvas의 windowWidth 옵션이 캡처본 자체의 레이아웃(미디어 쿼리)을
-       PC 기준으로 강제하지만, 캡처 전 높이를 재는 시점(scrollHeight)이
-       모바일 레이아웃 그대로면 실제 캡처 높이와 어긋나 표가 잘려 보일 수 있다.
-       그래서 캡처 직전, 화면에 보이는 요소 자체도 잠깐 PC 폭으로 고정해
-       실제 렌더링 높이를 정확히 측정한다. */
+       항상 PC 버전과 동일한 1100px 레이아웃으로 저장되도록 한다. */
     const prevTransform = area.style.transform;
-    const prevWidth = area.style.width;
-    const prevMaxWidth = area.style.maxWidth;
-
     area.style.transform = "none";
-    area.style.width = `${DESKTOP_CAPTURE_WIDTH}px`;
-    area.style.maxWidth = "none";
-
-    // 위 스타일 변경이 실제 레이아웃에 반영될 때까지 한 프레임 대기
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     try {
-        const captureHeight = Math.max(area.scrollHeight + 40, 1600);
-
         const canvas = await html2canvas(area, {
             backgroundColor: "#ffffff",
             scale: 4,
             useCORS: true,
             logging: false,
             windowWidth: DESKTOP_CAPTURE_WIDTH,
-            windowHeight: captureHeight,
-            /* 모바일 브라우저에서 페이지가 스크롤된 상태로 저장 버튼을 누르면
-               캡처 결과의 위쪽/아래쪽이 잘려 보이는 경우가 있어,
-               스크롤 위치를 보정해 항상 요소 전체가 캡처되도록 한다. */
-            scrollX: 0,
-            scrollY: -window.scrollY,
-            x: 0,
-            y: 0,
+            windowHeight: Math.max(area.scrollHeight, 1600),
             /*
              * html2canvas는 textarea 안의 줄바꿈/자동 줄바꿈을 제대로
              * 그리지 못해서(한 줄로만 렌더링되며 잘려 보임), 캡처용으로
@@ -895,7 +863,7 @@ saveBtn.addEventListener("click", async () => {
 
         const link = document.createElement("a");
         link.href = currentBlobUrl;
-        link.download = `IDID_${fileLabel}.png`;
+        link.download = `NCT127_${fileLabel}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -905,12 +873,9 @@ saveBtn.addEventListener("click", async () => {
     } finally {
         area.classList.remove("capturing");
         area.style.transform = prevTransform;
-        area.style.width = prevWidth;
-        area.style.maxWidth = prevMaxWidth;
         buttonWrap.style.display = "flex";
         tabWrap.style.display = "flex";
         dateToggleWrap.style.display = "flex";
-        fitCaptureArea();
     }
 });
 
@@ -949,15 +914,10 @@ function fitCaptureArea() {
            세로로 길어진 내용은 화면을 드래그해서 내려보는 방식으로 확인한다. */
         area.style.transform = "none";
         area.style.transformOrigin = "";
-        area.style.width = "";
-        area.style.maxWidth = "";
         wrap.style.width = "";
         wrap.style.height = "";
         return;
     }
-
-    area.style.width = "";
-    area.style.maxWidth = "";
 
     const scale = Math.min(1, screenWidth / DESKTOP_CAPTURE_WIDTH);
 
